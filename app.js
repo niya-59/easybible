@@ -23,6 +23,39 @@ async function loadBible() {
 
     createBookList();
 
+function loadFromURL(){
+
+    if(!window.location.hash) return false;
+
+    const hash =
+        decodeURIComponent(window.location.hash.substring(1));
+
+    const parts = hash.split("-");
+
+    if(parts.length !== 2) return false;
+
+    const bookIndex =
+        bible.findIndex(book=>book.korean===parts[0]);
+
+    const chapterIndex =
+        Number(parts[1])-1;
+
+    if(bookIndex<0) return false;
+
+    bookSelect.value=bookIndex;
+
+    createChapterList(bookIndex);
+
+    chapterSelect.value=chapterIndex;
+
+    createVerseList(bookIndex,chapterIndex);
+
+    showChapter(bookIndex,chapterIndex);
+
+    return true;
+
+}
+
 }
 
 // 책 목록 생성
@@ -98,7 +131,26 @@ function showChapter(bookIndex, chapterIndex){
 
     });
 
+    updateURL(bookIndex, chapterIndex);
+
 }
+
+function updateURL(bookIndex, chapterIndex){
+
+    const bookName = encodeURIComponent(bible[bookIndex].korean);
+
+    window.location.hash =
+        `${bookName}-${chapterIndex+1}`;
+
+}
+
+localStorage.setItem(
+    "lastRead",
+    JSON.stringify({
+        book:bookIndex,
+        chapter:chapterIndex
+    })
+);
 
 function moveChapter(direction){
 
@@ -239,3 +291,5 @@ nextChapterBtn.addEventListener("click", ()=>{
     moveChapter(1);
 
 });
+
+loadBible();
