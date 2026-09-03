@@ -18,10 +18,15 @@ async function loadBible() {
     bible = await response.json();
 
     console.log(bible);
-
     console.log(bible[0]);
 
     createBookList();
+
+    if (!loadFromURL()) {
+        loadLastRead();
+    }
+
+}
 
 function loadFromURL(){
 
@@ -53,8 +58,6 @@ function loadFromURL(){
     showChapter(bookIndex,chapterIndex);
 
     return true;
-
-}
 
 }
 
@@ -141,16 +144,36 @@ function updateURL(bookIndex, chapterIndex){
 
     window.location.hash =
         `${bookName}-${chapterIndex+1}`;
-
+    
+    localStorage.setItem(
+        "lastRead",
+        JSON.stringify({
+            book: bookIndex,
+            chapter: chapterIndex
+        })
+    );
 }
 
-localStorage.setItem(
-    "lastRead",
-    JSON.stringify({
-        book:bookIndex,
-        chapter:chapterIndex
-    })
-);
+function loadLastRead(){
+
+    const saved = localStorage.getItem("lastRead");
+
+    if(!saved) return false;
+
+    const pos = JSON.parse(saved);
+
+    bookSelect.value = pos.book;
+
+    createChapterList(pos.book);
+
+    chapterSelect.value = pos.chapter;
+
+    createVerseList(pos.book, pos.chapter);
+
+    showChapter(pos.book, pos.chapter);
+
+    return true;
+}
 
 function moveChapter(direction){
 
@@ -241,8 +264,6 @@ bookSelect.addEventListener("change", ()=>{
     showChapter(selectedBook,0);
 
 });
-
-loadBible();
 
 chapterSelect.addEventListener("change", ()=>{
 
